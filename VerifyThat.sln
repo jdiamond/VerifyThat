@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerifyThat", "VerifyThat\VerifyThat.csproj", "{01DBB1C7-105F-4536-A80C-1CDD7AA19A33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerifyThat.Tests", "VerifyThat.Tests\VerifyThat.Tests.csproj", "{7660E9AF-672E-4250-B15C-E92582494857}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01DBB1C7-105F-4536-A80C-1CDD7AA19A33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01DBB1C7-105F-4536-A80C-1CDD7AA19A33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01DBB1C7-105F-4536-A80C-1CDD7AA19A33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01DBB1C7-105F-4536-A80C-1CDD7AA19A33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7660E9AF-672E-4250-B15C-E92582494857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7660E9AF-672E-4250-B15C-E92582494857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7660E9AF-672E-4250-B15C-E92582494857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7660E9AF-672E-4250-B15C-E92582494857}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
