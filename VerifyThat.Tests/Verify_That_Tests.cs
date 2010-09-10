@@ -13,7 +13,7 @@
         {
             int foo = 1; // This can't be a constant or it will appear as a constant in the expression tree.
 
-            Act(() => foo == 2);
+            GetFailureMessage(() => foo == 2);
 
             Verify.That(() => this.message == "Expected foo to be 2 but was 1" );
         }
@@ -21,7 +21,7 @@
         [Test]
         public void Field_names_are_reported()
         {
-            Act(() => this.field == 2);
+            GetFailureMessage(() => this.field == 2);
 
             Verify.That(() => this.message == "Expected field to be 2 but was 1");
         }
@@ -29,7 +29,7 @@
         [Test]
         public void Property_names_are_reported()
         {
-            Act(() => this.Property == 2);
+            GetFailureMessage(() => this.Property == 2);
 
             Verify.That(() => this.message == "Expected Property to be 2 but was 1");
         }
@@ -37,7 +37,7 @@
         [Test]
         public void Static_property_names_are_reported()
         {
-            Act(() => StaticProperty == 2);
+            GetFailureMessage(() => StaticProperty == 2);
 
             Verify.That(() => this.message == "Expected " + this.GetType().Name + ".StaticProperty to be 2 but was 1");
         }
@@ -45,7 +45,7 @@
         [Test]
         public void Method_names_are_reported()
         {
-            Act(() => this.Method(1) == 2);
+            GetFailureMessage(() => this.Method(1) == 2);
 
             Verify.That(() => this.message == "Expected Method(1) to be 2 but was 1");
         }
@@ -53,15 +53,15 @@
         [Test]
         public void Method_with_multiple_parameters_are_reported_correctly()
         {
-            Act(() => this.Method(1, 2) == 2);
+            GetFailureMessage(() => this.Method(1, 2) == 4);
 
-            Verify.That(() => this.message == "Expected Method(1, 2) to be 2 but was 1");
+            Verify.That(() => this.message == "Expected Method(1, 2) to be 4 but was 3");
         }
 
         [Test]
         public void Static_method_names_are_reported()
         {
-            Act(() => StaticMethod(1) == 2);
+            GetFailureMessage(() => StaticMethod(1) == 2);
 
             Verify.That(() => this.message == "Expected " + this.GetType().Name + ".StaticMethod(1) to be 2 but was 1");
         }
@@ -69,7 +69,7 @@
         [Test]
         public void Strings_are_quoted()
         {
-            Act(() => "1".Trim() == "2"); // Trim is there to avoid a constant in the expression tree.
+            GetFailureMessage(() => "1".Trim() == "2"); // Trim is there to avoid a constant in the expression tree.
 
             Verify.That(() => this.message == "Expected \"1\".Trim() to be \"2\" but was \"1\"");
         }
@@ -77,7 +77,7 @@
         [Test]
         public void Special_characters_in_strings_are_escaped()
         {
-            Act(() => "\"\\\0\a\b\f\n\r\t\v".ToString() == "x"); // ToString is there to avoid a constant in the expression tree.
+            GetFailureMessage(() => "\"\\\0\a\b\f\n\r\t\v".ToString() == "x"); // ToString is there to avoid a constant in the expression tree.
 
             Verify.That(() => this.message == "Expected \"\\\"\\\\\\0\\a\\b\\f\\n\\r\\t\\v\".ToString() to be \"x\" but was \"\\\"\\\\\\0\\a\\b\\f\\n\\r\\t\\v\"");
         }
@@ -85,7 +85,7 @@
         [Test]
         public void Invoking_methods_on_int_literals_still_reports_the_literal()
         {
-            Act(() => 1.ToString() == "2");
+            GetFailureMessage(() => 1.ToString() == "2");
 
             Verify.That(() => this.message == "Expected 1.ToString() to be \"2\" but was \"1\"");
         }
@@ -93,7 +93,7 @@
         [Test]
         public void Invoking_methods_on_string_literals_still_reports_the_literal()
         {
-            Act(() => "1".Trim() == "2");
+            GetFailureMessage(() => "1".Trim() == "2");
 
             Verify.That(() => this.message == "Expected \"1\".Trim() to be \"2\" but was \"1\"");
         }
@@ -103,7 +103,7 @@
         {
             var foo = new[] { 1, 2, 3 };
 
-            Act(() => foo[0] == 2);
+            GetFailureMessage(() => foo[0] == 2);
 
             Verify.That(() => this.message == "Expected foo[0] to be 2 but was 1");
         }
@@ -113,7 +113,7 @@
         {
             var foo = new[] { 1, 2, 3 };
 
-            Act(() => foo.Length == 2);
+            GetFailureMessage(() => foo.Length == 2);
 
             Verify.That(() => this.message == "Expected foo.Length to be 2 but was 3");
         }
@@ -123,7 +123,7 @@
         {
             var foo = new MyObject();
 
-            Act(() => foo[1] == 2);
+            GetFailureMessage(() => foo[1] == 2);
 
             Verify.That(() => this.message == "Expected foo[1] to be 2 but was 1");
         }
@@ -133,7 +133,7 @@
         {
             var foo = new MyObject();
 
-            Act(() => foo.GetType() == typeof(string));
+            GetFailureMessage(() => foo.GetType() == typeof(string));
 
             Verify.That(() => this.message == "Expected foo.GetType() to be typeof(string) but was typeof(MyObject)");
         }
@@ -143,7 +143,7 @@
         {
             object foo = new MyObject();
 
-            Act(() => foo is string);
+            GetFailureMessage(() => foo is string);
 
             Verify.That(() => this.message == "Expected foo to be typeof(string) but was typeof(MyObject)");
         }
@@ -153,7 +153,7 @@
         {
             DateTime today = DateTime.MinValue;
 
-            Act(() => today == DateTime.Today);
+            GetFailureMessage(() => today == DateTime.Today);
 
             Verify.That(() => this.message == "Expected today to be DateTime.Today but was 0001-01-01T00:00:00");
         }
@@ -163,7 +163,7 @@
         {
             object foo = 1;
 
-            Act(() => (int)foo == 2);
+            GetFailureMessage(() => (int)foo == 2);
 
             Verify.That(() => this.message == "Expected (int)foo to be 2 but was 1");
         }
@@ -173,7 +173,7 @@
         {
             object foo = "1";
 
-            Act(() => foo as string == "2");
+            GetFailureMessage(() => foo as string == "2");
 
             Verify.That(() => this.message == "Expected foo as string to be \"2\" but was \"1\"");
         }
@@ -183,7 +183,7 @@
         {
             bool foo = true;
 
-            Act(() => !foo == true);
+            GetFailureMessage(() => !foo);
 
             Verify.That(() => this.message == "Expected !foo to be true but was false");
         }
@@ -193,7 +193,7 @@
         {
             int foo = 1;
 
-            Act(() => -foo == 2);
+            GetFailureMessage(() => -foo == 2);
 
             Verify.That(() => this.message == "Expected -foo to be 2 but was -1");
         }
@@ -203,7 +203,7 @@
         {
             var foo = new MyObject { IntProperty = 1, StringProperty = "a" };
 
-            Act(() => foo == new MyObject { IntProperty = 2, StringProperty = "b" });
+            GetFailureMessage(() => foo == new MyObject { IntProperty = 2, StringProperty = "b" });
 
             Verify.That(() => this.message == "Expected foo to be new MyObject { IntProperty = 2, StringProperty = \"b\" } but was [1, a]");
         }
@@ -213,7 +213,7 @@
         {
             var foo = 1;
 
-            Act(() => (foo == 1 ? "a" : "b") == "c");
+            GetFailureMessage(() => (foo == 1 ? "a" : "b") == "c");
 
             Verify.That(() => this.message == "Expected foo == 1 ? \"a\" : \"b\" to be \"c\" but was \"a\"");
         }
@@ -223,7 +223,7 @@
         {
             var foo = new[] { 1, 2, 3 };
 
-            Act(() => foo.First() == 2);
+            GetFailureMessage(() => foo.First() == 2);
 
             Verify.That(() => this.message == "Expected foo.First() to be 2 but was 1");
         }
@@ -233,10 +233,12 @@
         {
             var foo = new[] { 1, 2, 3 };
 
-            Act(() => foo.Contains(4));
+            GetFailureMessage(() => foo.Contains(4));
 
             Verify.That(() => this.message == "Expected foo.Contains(4) to be true but was false");
         }
+
+        #region Members used in expressions
 
         private int field = 1;
 
@@ -251,7 +253,7 @@
 
         private int Method(int value1, int value2)
         {
-            return value1;
+            return value1 + value2;
         }
 
         private static int StaticMethod(int value)
@@ -276,13 +278,20 @@
             }
         }
 
+        #endregion
+
+        #region Test helpers
+
         private string message;
 
-        private void Act(Expression<Func<bool>> expression)
+        private void GetFailureMessage(Expression<Func<bool>> expression)
         {
-            Verify.That(expression,
+            Verify.That(
+                expression,
                 m => this.message = m,
                 (x, r, e, a) => string.Format("Expected {0} to {1} {2} but was {3}", x, r, e, a));
         }
+
+        #endregion
     }
 }
