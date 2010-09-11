@@ -46,12 +46,12 @@ namespace VerifyThat
             That(expression, DefaultReporter);
         }
 
-        public static void That(Expression<Func<bool>> expression, Action<string> reporter)
+        public static void That(Expression<Func<bool>> expression, MessageReporter reporter)
         {
-            That(expression, DefaultReporter, DefaultFormatter);
+            That(expression, reporter, DefaultFormatter);
         }
 
-        public static void That(Expression<Func<bool>> expression, Action<string> reporter, Func<string, string, string, string, string> formatter)
+        public static void That(Expression<Func<bool>> expression, MessageReporter reporter, MessageFormatter formatter)
         {
             if (expression == null) throw new ArgumentNullException("expression");
 
@@ -63,10 +63,10 @@ namespace VerifyThat
             throw new VerificationException(Environment.NewLine + message);
         }
 
-        private static string DefaultFormatter(string expression, string relation, string expected, string actual)
+        private static string DefaultFormatter(string expression, string be, string expected, string was, string actual)
         {
             const string expectedText = "Expected:";
-            string relationText = "to " + relation + ":";
+            string relationText = "to " + be + ":";
             const string butWasText = "but was:";
 
             int length = Math.Max(expectedText.Length, Math.Max(relationText.Length, butWasText.Length)) + 2;
@@ -76,7 +76,7 @@ namespace VerifyThat
                    butWasText.PadLeft(length) + " " + actual;
         }
 
-        private static void EvaluateExpression(Expression expression, Action<string> reporter, Func<string, string, string, string, string> formatter)
+        private static void EvaluateExpression(Expression expression, MessageReporter reporter, MessageFormatter formatter)
         {
             switch (expression.NodeType)
             {
@@ -89,14 +89,14 @@ namespace VerifyThat
             }
         }
 
-        private static void EvaluateAndAlsoExpression(Expression expression, Action<string> reporter, Func<string, string, string, string, string> formatter)
+        private static void EvaluateAndAlsoExpression(Expression expression, MessageReporter reporter, MessageFormatter formatter)
         {
             var andAlsoExpression = (BinaryExpression)expression;
             EvaluateExpression(andAlsoExpression.Left, reporter, formatter);
             EvaluateExpression(andAlsoExpression.Right, reporter, formatter);
         }
 
-        private static void TestExpression(Expression expression, Action<string> reporter, Func<string, string, string, string, string> formatter)
+        private static void TestExpression(Expression expression, MessageReporter reporter, MessageFormatter formatter)
         {
             if (expression is BinaryExpression)
             {
@@ -112,7 +112,7 @@ namespace VerifyThat
             }
         }
 
-        private static void TestBinaryExpression(BinaryExpression binaryExpression, Action<string> reporter, Func<string, string, string, string, string> formatter)
+        private static void TestBinaryExpression(BinaryExpression binaryExpression, MessageReporter reporter, MessageFormatter formatter)
         {
             object actual = DynamicEvaluate(binaryExpression.Left);
 
@@ -129,7 +129,7 @@ namespace VerifyThat
                 string operation = GetBinaryOperatorText(binaryExpression.NodeType);
                 string right = ExpressionStringBuilder.GetExpressionString(binaryExpression.Right);
 
-                reporter(formatter(left, operation, right, ExpressionStringBuilder.GetValue(actual)));
+                reporter(formatter(left, operation, right, "was", ExpressionStringBuilder.GetValue(actual)));
             }
         }
 
@@ -159,7 +159,7 @@ namespace VerifyThat
             return null;
         }
 
-        private static void TestTypeBinaryExpression(TypeBinaryExpression typeBinaryExpression, Action<string> reporter, Func<string, string, string, string, string> formatter)
+        private static void TestTypeBinaryExpression(TypeBinaryExpression typeBinaryExpression, MessageReporter reporter, MessageFormatter formatter)
         {
             object actual = DynamicEvaluate(typeBinaryExpression.Expression);
 
@@ -175,18 +175,37 @@ namespace VerifyThat
                 string right = ExpressionStringBuilder.GetValue(typeBinaryExpression.TypeOperand);
                 string actualType = ExpressionStringBuilder.GetValue(actual.GetType());
 
-                reporter(formatter(left, "be", right, actualType));
+                reporter(formatter(left, "be", right, "was", actualType));
             }
         }
 
-        private static void TestNonBinaryExpression(Expression expression, Action<string> reporter, Func<string, string, string, string, string> formatter)
+        private static void TestNonBinaryExpression(Expression expression, MessageReporter reporter, MessageFormatter formatter)
         {
-            bool result = EvaluateBoolean(expression);
-
-            if (!result)
+            try
             {
+                bool result = EvaluateBoolean(expression);
+
+                if (!result)
+                {
+                    string description = ExpressionStringBuilder.GetExpressionString(expression);
+                    reporter(formatter(description, "be", "true", "was", "false"));
+                }
+            }
+            catch (CustomExtensionMethodVerificationException e)
+            {
+                if (expression.NodeType == ExpressionType.Call)
+                {
+                    var methodCallExpression = (MethodCallExpression)expression;
+
+                    if (IsExtensionMethod(methodCallExpression.Method) &&
+                        methodCallExpression.Arguments.Count > 0)
+                    {
+                        expression = methodCallExpression.Arguments[0];
+                    }
+                }
+
                 string description = ExpressionStringBuilder.GetExpressionString(expression);
-                reporter(formatter(description, "be", "true", "false"));
+                reporter(formatter(description, e.BeText, e.ExpectedText, e.WasText, e.ActualText));
             }
         }
 
@@ -203,6 +222,12 @@ namespace VerifyThat
             var lambda = Expression.Lambda<Func<bool>>(expression);
             var @delegate = lambda.Compile();
             return @delegate();
+        }
+
+        private static bool IsExtensionMethod(MethodInfo method)
+        {
+            return method.IsStatic &&
+                   Attribute.IsDefined(method, typeof(ExtensionAttribute));
         }
 
         private abstract class ExpressionVisitor
@@ -716,12 +741,6 @@ namespace VerifyThat
                 return m;
             }
 
-            private static bool IsExtensionMethod(MethodInfo method)
-            {
-                return method.IsStatic &&
-                       Attribute.IsDefined(method, typeof(ExtensionAttribute));
-            }
-
             protected override Expression VisitUnary(UnaryExpression u)
             {
                 if (u.NodeType == ExpressionType.ArrayLength)
@@ -872,6 +891,10 @@ namespace VerifyThat
         }
     }
 
+    public delegate void MessageReporter(string message);
+
+    public delegate string MessageFormatter(string expression, string be, string expected, string was, string actual);
+
     public class VerificationException : Exception
     {
         private static readonly Regex StackTraceFilter = new Regex(@"VerifyThat(?!\.(Tests))\.");
@@ -903,6 +926,34 @@ namespace VerifyThat
         public override string StackTrace
         {
             get { return this.FilterStackTrace(); }
+        }
+    }
+
+    public class CustomExtensionMethodVerificationException : Exception
+    {
+        public CustomExtensionMethodVerificationException(string beText, string expectedText, string wasText, string actualText)
+        {
+            this.BeText = beText;
+            this.ExpectedText = expectedText;
+            this.WasText = wasText;
+            this.ActualText = actualText;
+        }
+
+        public string BeText { get; set; }
+        public string ExpectedText { get; private set; }
+        public string WasText { get; private set; }
+        public string ActualText { get; private set; }
+    }
+
+    public static class EnumerableExtensions
+    {
+        public static bool IsEmpty<T>(this IEnumerable<T> source)
+        {
+            int count = source.Count();
+
+            if (count == 0) return true;
+
+            throw new CustomExtensionMethodVerificationException("be", "empty", "contained", string.Format("{0} items", count));
         }
     }
 }

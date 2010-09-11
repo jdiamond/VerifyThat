@@ -266,6 +266,16 @@ namespace VerifyThat.Tests
             Verify.That(() => this.message == "Expected foo.Contains(4) to be true but was false");
         }
 
+        [Test]
+        public void The_Empty_extension_method_reports_a_custom_failure_message()
+        {
+            var foo = new[] { 1, 2, 3 };
+
+            GetFailureMessage(() => foo.IsEmpty());
+
+            Verify.That(() => this.message == "Expected foo to be empty but contained 3 items");
+        }
+
         #region Members used in expressions
 
         private int field = 1;
@@ -317,7 +327,7 @@ namespace VerifyThat.Tests
             Verify.That(
                 expression,
                 m => this.message = m,
-                (x, r, e, a) => string.Format("Expected {0} to {1} {2} but was {3}", x, r, e, a));
+                (x, b, e, w, a) => string.Format("Expected {0} to {1} {2} but {3} {4}", x, b, e, w, a));
         }
 
         #endregion
