@@ -1,8 +1,12 @@
-VerifyThat a really small library for doing assertions in your unit
-tests. It requires .NET 3.5 or higher.
+VerifyThat is a really small library for doing assertions in your
+unit tests. It requires .NET 3.5 or higher.
 
 You can build the solution and reference the assembly or just add the
-single .cs file to your unit test project.
+single VerifyThat.cs file to your unit test project.
+
+You can use it with any unit test framework even though the examples
+below refer to using it with NUnit. It has no dependencies on any
+assemblies not included with .NET.
 
 The only method you need to use is `Verify.That`:
 
@@ -23,7 +27,7 @@ You can state your assertion in "normal" C# like this:
 
    Verify.That(() => foo == 42);
 
-The only ugly part is that `() =>` part in there, but there's nothing
+The only ugly part is that `() =>` bit in there, but there's nothing
 we can do about that.
 
 If foo is 13 instead of 42, the message you'll get is this:
@@ -40,18 +44,18 @@ them to them.
 
 VerifyThat even supports complex expressions in the assertion:
 
-   Verify.That(() => foo * 2 + bar + 1 == 42);
+   Verify.That(() => foo.Bar(baz).Quux + 1 == 42);
 
-That could report something like this:
+That could report something like this if the assertion failed:
 
- Expected: foo * 2 + bar + 1
+ Expected: foo.Bar(baz).Quux + 1
     to be: 42
   but was: 43
 
 There's still a lot to do so that it reports every type of expression
 correctly, but it can already handle the majority of cases.
 
-Feel free to fork the project on GitHub and submit any pull requests
+Feel free to fork the project on GitHub and submit a pull request
 if you make any changes.
 
 http://github.com/jdiamond/VerifyThat
