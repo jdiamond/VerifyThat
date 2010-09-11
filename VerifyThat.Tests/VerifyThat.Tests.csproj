@@ -41,8 +41,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnumerableExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VerifyThatTests.cs" />
+    <Compile Include="VerifyThatTestsBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VerifyThat\VerifyThat.csproj">

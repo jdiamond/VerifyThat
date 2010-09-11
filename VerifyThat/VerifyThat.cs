@@ -953,7 +953,30 @@ namespace VerifyThat
 
             if (count == 0) return true;
 
-            throw new CustomExtensionMethodVerificationException("be", "empty", "contained", string.Format("{0} items", count));
+            throw new CustomExtensionMethodVerificationException(
+                "be", "empty",
+                "contained", string.Format("{0} items", count));
+        }
+
+        public static bool IsSubsetOf<T>(this IEnumerable<T> source, IEnumerable<T> other)
+        {
+            var sourceSet = new HashSet<T>(source);
+
+            // TODO: other is being enumerated multiple times. Should it be cached?
+
+            if (sourceSet.IsSubsetOf(other)) return true;
+
+            sourceSet.ExceptWith(other);
+
+            throw new CustomExtensionMethodVerificationException(
+                "be", "subset of " + Format(other),
+                "difference was", Format(sourceSet));
+        }
+
+        private static string Format<T>(IEnumerable<T> source)
+        {
+            // TODO: Handle nulls and escaping of special characters in strings.
+            return "{" + string.Join(", ", source.Select(x => x.ToString()).ToArray()) + "}";
         }
     }
 }
